@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="Easy Skills Banner" width="100%" />
+<img src="assets/banner.svg?v=2" alt="Easy Skills Banner" width="100%" />
 
 <br />
 
