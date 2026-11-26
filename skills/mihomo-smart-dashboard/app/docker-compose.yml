@@ -1,0 +1,26 @@
+services:
+  smart-dashboard:
+    build: .
+    container_name: smart-dashboard
+    restart: unless-stopped
+    ports:
+      - "8899:8899"
+    environment:
+      - TZ=Asia/Shanghai
+      - PORT=8899
+      - SYNC_INTERVAL=60
+      # 模式 A（同机本地直挂 cache.db，推荐 OpenWrt / Linux / NAS）：
+      - SOURCE_MODE=local
+      - LOCAL_DB_PATH=/data/cache.db
+      # 模式 B（远程 SSH/SCP 拉取 RouterOS 或其他主机 cache.db，启用时注释上面两行并取消下面注释）：
+      # - SOURCE_MODE=ssh
+      # - ROS_HOST={{ROS_IP}}
+      # - ROS_PORT=22
+      # - ROS_USER=admin
+      # - ROS_DB_PATH=etc-mihomo/cache.db
+      # - SSH_KEY_PATH=/ssh/id_ed25519
+    volumes:
+      # 模式 A：只读挂载本地 Mihomo 的 cache.db
+      - /path/to/mihomo/cache.db:/data/cache.db:ro
+      # 模式 B：只读挂载免密 SSH 私钥目录
+      # - ./ssh:/ssh:ro

@@ -33,6 +33,7 @@
 | 技能名称 | 分类 | 一句话说明 | 详情 |
 | :--- | :--- | :--- | :---: |
 | [`ros-mihomo-smart-architect`](skills/ros-mihomo-smart-architect/) | 软路由 / 网络 | 全新 RouterOS 7.x 一键部署 CNIP 硬件直出 + Mihomo Smart (LightGBM) 多机场混跑与防断网校验 | [进入主页](skills/ros-mihomo-smart-architect/) |
+| [`mihomo-smart-dashboard`](skills/mihomo-smart-dashboard/) | 可视化 / 监控 | 一键部署 Mihomo Smart 单页白金效果展示屏（实时分流图 / 多服务商混跑 / 自动避坑，支持本地与 SSH 双模式） | [进入主页](skills/mihomo-smart-dashboard/) |
 
 > 仓库持续沉淀真实环境打磨出的高质量技能，欢迎点一颗 **Star** 关注后续更新。
 

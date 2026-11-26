@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart 智能选路中心</title>
+  <style>
+    :root {
+      --bg: #F6F8FA;
+      --surface: #FFFFFF;
+      --surface-subtle: #F8FAFC;
+      --border: #E2E8F0;
+      --border-strong: #CBD5E1;
+      --text-primary: #1F2328;
+      --text-secondary: #57606A;
+      --text-muted: #8B949E;
+      --blue: #0066CC;
+      --blue-soft: #EFF6FF;
+      --blue-border: #BFDBFE;
+      --green: #15803D;
+      --green-soft: #F0FDF4;
+      --green-border: #BBF7D0;
+      --amber: #D97706;
+      --amber-accent: #E96A2E;
+      --amber-soft: #FFF7ED;
+      --amber-border: #FED7AA;
+      --red: #DC2626;
+      --red-soft: #FEF2F2;
+      --red-border: #FECACA;
+      --slate-soft: #F1F5F9;
+      --radius-card: 20px;
+      --radius-inner: 14px;
+      --radius-sm: 10px;
+      --radius-pill: 999px;
+      --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px rgba(15, 23, 42, 0.04);
+      --shadow-drawer: -12px 0 40px rgba(15, 23, 42, 0.12);
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 22px 20px 44px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .brand-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    .dot.err { background: var(--red); }
+
+    .select-input {
+      padding: 7px 12px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 180ms var(--spring);
+    }
+
+    .select-input:focus { border-color: var(--blue); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 140ms var(--spring), background 180ms var(--spring), border-color 180ms var(--spring);
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #FFFFFF;
+      border: 1px solid var(--blue);
+    }
+
+    .btn-primary:hover {
+      background: #0055AA;
+      border-color: #0055AA;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .spin { animation: spin 0.9s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Row 1: 4 Hero KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      transition: transform 240ms var(--spring), box-shadow 240ms var(--spring);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 9px;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05), 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .kpi-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .kpi-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .kpi-icon.green { background: var(--green-soft); color: var(--green); }
+    .kpi-icon.blue { background: var(--blue-soft); color: var(--blue); }
+    .kpi-icon.amber { background: var(--amber-soft); color: var(--amber-accent); }
+
+    .kpi-value {
+      font-size: 27px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+
+    .kpi-progress {
+      height: 5px;
+      width: 100%;
+      background: #EEF2F6;
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .kpi-progress-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--green);
+      transition: width 420ms var(--spring);
+    }
+
+    .kpi-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Section Card Shell */
+    .bento-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .section-title-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 16.5px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    .section-desc {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      line-height: 1.4;
+    }
+
+    .badge-blue { background: var(--blue-soft); color: var(--blue); border: 1px solid var(--blue-border); }
+    .badge-green { background: var(--green-soft); color: var(--green); border: 1px solid var(--green-border); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); }
+    .badge-red { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-border); }
+    .badge-slate { background: var(--surface-subtle); color: var(--text-secondary); border: 1px solid var(--border); }
+
+    .segmented {
+      display: inline-flex;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .seg-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 180ms var(--spring), color 180ms var(--spring);
+    }
+
+    .seg-btn.active {
+      background: var(--surface);
+      color: var(--blue);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Row 2: Hero Effect Showcase (Visual Routing Map + Multi-Airport Synergy & Insights) */
+    .hero-showcase-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+      align-items: stretch;
+    }
+
+    .hero-showcase-grid .bento-card {
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Live Routing Flow Map */
+    .flow-stage {
+      position: relative;
+      background: linear-gradient(180deg, #FAFCFF 0%, #F8FAFC 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 14px;
+      overflow: hidden;
+    }
+
+    .flow-cols {
+      display: grid;
+      grid-template-columns: 1fr 128px 1.25fr;
+      align-items: center;
+      gap: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .flow-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .flow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .flow-node {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+      min-height: 44px;
+    }
+
+    .flow-node.site-pill {
+      border-left: 3px solid var(--blue);
+    }
+
+    .flow-node.dest-pill {
+      border-right: 3px solid var(--blue);
+    }
+
+    .flow-node.dest-pill.p-0 { border-right-color: var(--green); }
+    .flow-node.dest-pill.p-1 { border-right-color: var(--blue); }
+    .flow-node.dest-pill.p-2 { border-right-color: var(--amber-accent); }
+    .flow-node.dest-pill.p-3 { border-right-color: #7C3AED; }
+    .flow-node.dest-pill.p-4 { border-right-color: #0D9488; }
+    .flow-node.dest-pill.p-5 { border-right-color: #64748B; }
+
+    .flow-node.blocked-pill {
+      background: var(--red-soft);
+      border: 1px dashed var(--red-border);
+      color: #991B1B;
+    }
+
+    .flow-node-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .flow-node-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .flow-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 290px;
+    }
+
+    .flow-svg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-line {
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      opacity: 0.72;
+    }
+
+    .flow-line.anim {
+      stroke-dasharray: 5 5;
+      animation: flowDash 1.8s linear infinite;
+    }
+
+    .flow-line.blocked {
+      stroke: #EF4444;
+      stroke-dasharray: 4 4;
+      opacity: 0.65;
+    }
+
+    @keyframes flowDash {
+      from { stroke-dashoffset: 20; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .ai-hub {
+      position: relative;
+      z-index: 3;
+      width: 96px;
+      padding: 12px 8px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1.5px solid var(--blue-border);
+      box-shadow: 0 6px 22px rgba(0, 102, 204, 0.14);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+    }
+
+    .ai-hub-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: var(--blue);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-hub-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .ai-hub-sub {
+      font-size: 10.5px;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .flow-legend {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .legend-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Multi-Airport Synergy Stacked Bar & Insights */
+    .synergy-box {
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+
+    .synergy-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stacked-bar {
+      height: 12px;
+      width: 100%;
+      border-radius: var(--radius-pill);
+      background: #E2E8F0;
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+      margin-bottom: 11px;
+    }
+
+    .stack-seg {
+      height: 100%;
+      transition: width 420ms var(--spring);
+    }
+
+    .stack-seg.c-0 { background: #16A34A; }
+    .stack-seg.c-1 { background: #0066CC; }
+    .stack-seg.c-2 { background: #EA580C; }
+    .stack-seg.c-3 { background: #7C3AED; }
+    .stack-seg.c-4 { background: #0D9488; }
+    .stack-seg.c-5 { background: #94A3B8; }
+
+    .prov-chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .prov-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .prov-chip-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .prov-chip-pct {
+      font-variant-numeric: tabular-nums;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .prov-chip-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .insight-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--text-primary);
+      line-height: 1.45;
+    }
+
+    .insight-item.t-blue { background: #F5F9FF; border-color: var(--blue-border); }
+    .insight-item.t-green { background: #F4FBF6; border-color: var(--green-border); }
+    .insight-item.t-amber { background: #FFF9F2; border-color: var(--amber-border); }
+    .insight-item.t-red { background: #FEF6F6; border-color: var(--red-border); }
+
+    /* Row 3: 3-Column Site Routing Showcase */
+    .sites-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 11px;
+      transition: transform 220ms var(--spring), border-color 220ms var(--spring), box-shadow 220ms var(--spring);
+    }
+
+    .site-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue-border);
+      box-shadow: 0 6px 20px rgba(0, 102, 204, 0.06);
+    }
+
+    .site-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .site-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .site-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+    }
+
+    .site-traffic {
+      text-align: right;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .site-traffic strong {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .ladder {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .cand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: var(--surface-subtle);
+      border: 1px solid transparent;
+    }
+
+    .cand-row.top1 {
+      background: var(--blue-soft);
+      border-color: var(--blue-border);
+      padding: 9px 11px;
+    }
+
+    .cand-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .rank-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .rank-tag.r1 { background: var(--blue); color: #FFFFFF; }
+    .rank-tag.r-sub { background: #E2E8F0; color: var(--text-secondary); }
+
+    .cand-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cand-row.top1 .cand-name {
+      font-weight: 600;
+      color: #0F172A;
+    }
+
+    .cand-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .mini-bar {
+      width: 44px;
+      height: 5px;
+      border-radius: var(--radius-pill);
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+
+    .cand-row.top1 .mini-bar { background: #DBEAFE; }
+
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: #94A3B8;
+      transition: width 360ms var(--spring);
+    }
+
+    .cand-row.top1 .mini-bar-fill { background: var(--blue); }
+
+    .score-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      min-width: 36px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .cand-row.top1 .score-num { color: var(--blue); }
+
+    .site-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 9px;
+      border-top: 1px solid #F1F5F9;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Row 4: Dual Column Row */
+    .mid-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+      margin-bottom: 18px;
+      align-items: stretch;
+    }
+
+    .mid-grid .bento-card {
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sub-block-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .fail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .fail-item {
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+    }
+
+    .fail-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .fail-site {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .fail-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .block-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 500;
+      background: var(--red-soft);
+      color: #991B1B;
+      border: 1px solid var(--red-border);
+      font-variant-numeric: tabular-nums;
+      max-width: 100%;
+    }
+
+    .block-pill span.bn {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 180px;
+    }
+
+    .cooldown-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .cool-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      color: #9A3412;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .health-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: var(--green-soft);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+      font-size: 12.5px;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #F1F5F9;
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #FAFCFF; }
+
+    .node-rank-cell {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .idx-pill {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .idx-pill.top3 {
+      background: var(--blue-soft);
+      border-color: var(--blue-border);
+      color: var(--blue);
+    }
+
+    .node-main {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .node-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .score-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-bar-lg {
+      width: 56px;
+      height: 6px;
+      border-radius: var(--radius-pill);
+      background: #E2E8F0;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .score-bar-lg-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--blue);
+    }
+
+    /* Row 5: Compact Subscriptions Strip */
+    .subs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .sub-strip {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .sub-strip-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sub-strip-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sub-strip-pct {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sub-bar {
+      height: 6px;
+      border-radius: var(--radius-pill);
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+
+    .sub-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--blue);
+      transition: width 360ms var(--spring);
+    }
+
+    .sub-bar-fill.warn { background: var(--amber-accent); }
+    .sub-bar-fill.crit { background: var(--red); }
+
+    .sub-strip-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .page-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Slide-over Geek Drawer */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.28);
+      backdrop-filter: blur(2px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 240ms var(--spring);
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(940px, 96vw);
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow-drawer);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 320ms var(--spring);
+    }
+
+    .drawer-panel.open { transform: translateX(0); }
+
+    .drawer-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .drawer-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .drawer-tools {
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      width: 240px;
+      outline: none;
+    }
+
+    .search-input:focus { border-color: var(--blue); }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 22px 32px;
+    }
+
+    .sortable { cursor: pointer; user-select: none; }
+    .sortable:hover { color: var(--blue); }
+
+    .rank-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .rank-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: var(--surface-subtle);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1120px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-showcase-grid { grid-template-columns: 1fr; }
+      .sites-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mid-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      .container { padding: 14px 12px 34px; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .kpi-card { padding: 13px 13px; }
+      .kpi-value { font-size: 22px; }
+      .flow-cols { grid-template-columns: 1fr; gap: 10px; }
+      .flow-center { min-height: 82px; }
+      .flow-svg-layer { display: none; }
+      .prov-chips { grid-template-columns: 1fr; }
+      .sites-grid { grid-template-columns: 1fr; }
+      .subs-grid { grid-template-columns: 1fr; }
+      .rank-grid { grid-template-columns: 1fr; }
+      .bento-card { padding: 15px 14px; }
+      .search-input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/>
+            <path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Smart 智能选路中心</h1>
+          <div class="brand-sub">AI 实时为每个网站挑选最快专线，多机场混跑加速并自动绕开卡顿线路</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="dot" id="syncDot"></span>
+          <span id="syncText">正在读取实时数据...</span>
+        </div>
+
+        <select class="select-input" id="groupFilter" onchange="onGroupChange()">
+          <option value="">全部策略组</option>
+        </select>
+
+        <button class="btn btn-secondary" type="button" onclick="openDrawer()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+          </svg>
+          <span>数据明细</span>
+        </button>
+
+        <button class="btn btn-primary" type="button" id="syncBtn" onclick="triggerSync()">
+          <svg id="syncIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+          </svg>
+          <span>立即刷新</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Row 1: 4 Plain-Language Hero KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-title">全屋智能畅通率</span>
+          <span class="kpi-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-value" id="kpiRate">--%</div>
+        <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiRateBar" style="width: 0%"></div></div>
+        <div class="kpi-desc" id="kpiReqs">已自动护航 -- 次访问请求</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-title">AI 记忆专属网站</span>
+          <span class="kpi-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-value" id="kpiSites">-- 站</div>
+        <div class="kpi-desc" id="kpiSitesDesc">不同网站独立匹配最快专线</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-title">AI 自动避坑拦截</span>
+          <span class="kpi-icon amber">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-value" id="kpiAvoid">-- 次</div>
+        <div class="kpi-desc" id="kpiAvoidDesc">正为常用网站自动绕开卡顿与报错线路</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-title">多专线协同加速</span>
+          <span class="kpi-icon blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </span>
+        </div>
+        <div class="kpi-value" id="kpiTraffic">-- GB</div>
+        <div class="kpi-desc" id="kpiPeakDesc">-- 条活跃专线协同加速</div>
+      </div>
+    </section>
+
+    <!-- Row 2: Visual Smart Proof Hero (Live Routing Flow Diagram + Multi-Airport Synergy & Insights) -->
+    <section class="hero-showcase-grid">
+      <!-- Left: Visual Live Routing Map -->
+      <div class="bento-card">
+        <div class="section-head" style="margin-bottom: 12px;">
+          <div>
+            <div class="section-title-row">
+              <h2 class="section-title">Smart 实时智能分流实景</h2>
+              <span class="badge badge-blue">一秒看懂区别</span>
+            </div>
+            <p class="section-desc">不同网站并行走不同机场最快专线，故障与慢速线路被自动挡在门外</p>
+          </div>
+        </div>
+
+        <div class="flow-stage" id="flowStage">
+          <svg class="flow-svg-layer" id="flowSvg" viewBox="0 0 760 320" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="flow-cols">
+            <div>
+              <div class="flow-col-title">常用网站与服务</div>
+              <div class="flow-list" id="flowSitesCol"></div>
+            </div>
+
+            <div class="flow-center">
+              <div class="ai-hub">
+                <div class="ai-hub-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="3"/><rect x="9" y="9" width="6" height="6"/>
+                    <path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/>
+                    <path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/>
+                  </svg>
+                </div>
+                <div class="ai-hub-title">Smart AI</div>
+                <div class="ai-hub-sub" id="hubStatText">实时优选</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flow-col-title">AI 匹配最优专线与自动避坑</div>
+              <div class="flow-list" id="flowDestCol"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-legend">
+          <div class="legend-group" id="flowLegend"></div>
+          <span style="color: var(--text-muted);">实时映射自路由器 Smart 模型库</span>
+        </div>
+      </div>
+
+      <!-- Right: Multi-Airport Synergy + Plain-Language Insights -->
+      <div class="bento-card">
+        <div>
+          <div class="section-head" style="margin-bottom: 12px;">
+            <div>
+              <div class="section-title-row">
+                <h2 class="section-title" id="synergyTitle">多服务商协同混跑</h2>
+                <span class="badge badge-green">物尽其用</span>
+              </div>
+              <p class="section-desc">传统测速只死磕单一线路，Smart 自动榨干全部服务商优势</p>
+            </div>
+            <div class="segmented" id="mixSwitch">
+              <button class="seg-btn active" type="button" onclick="setMixMode('req')">按请求</button>
+              <button class="seg-btn" type="button" onclick="setMixMode('dl')">按流量</button>
+            </div>
+          </div>
+
+          <div class="synergy-box">
+            <div class="synergy-top">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary);" id="mixLabel">多机场实战请求分担比例</span>
+              <span style="font-size: 11.5px; color: var(--text-muted);" id="mixTotalText">--</span>
+            </div>
+            <div class="stacked-bar" id="mixStackedBar"></div>
+            <div class="prov-chips" id="mixChips"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sub-block-label" style="margin-bottom: 8px;">
+            <span>Smart 实战效果战报</span>
+            <span style="font-size: 11px; font-weight: 500; color: var(--text-muted);">全部由真实连接数据自动汇总</span>
+          </div>
+          <div class="insights-list" id="insightsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 3: Deduplicated 6-Card Bento Grid — 千站千面智能按站选路 -->
+    <section class="bento-card">
+      <div class="section-head">
+        <div>
+          <div class="section-title-row">
+            <h2 class="section-title">千站千面 · 精选站点专线梯队</h2>
+            <span class="badge badge-blue" id="showcaseBadge">精选 6 大高频场景</span>
+          </div>
+          <p class="section-desc">每个网站独立保留首选与热备梯队，主力线路波动时毫秒级无感接替</p>
+        </div>
+        <div class="section-actions">
+          <div class="segmented" id="protoSwitch">
+            <button class="seg-btn active" type="button" onclick="setSiteMode('best')">综合推荐</button>
+            <button class="seg-btn" type="button" onclick="setSiteMode('tcp')">仅看网页</button>
+            <button class="seg-btn" type="button" onclick="setSiteMode('udp')">仅看实时流</button>
+          </div>
+          <button class="btn btn-secondary" type="button" id="toggleAllSitesBtn" onclick="toggleAllSites()">展开全部站点</button>
+        </div>
+      </div>
+
+      <div class="sites-grid" id="sitesGrid"></div>
+    </section>
+
+    <!-- Row 4: Mid 2-Column Bento -->
+    <section class="mid-grid">
+      <!-- Left: AI Auto Pitfall Avoidance -->
+      <div class="bento-card">
+        <div class="section-head">
+          <div>
+            <div class="section-title-row">
+              <h2 class="section-title">AI 自动避坑小黑屋</h2>
+              <span class="badge badge-amber" id="avoidSummaryBadge">实时巡检</span>
+            </div>
+            <p class="section-desc">某条线对特定网站抽风或限速时，自动定向拉黑冷却，无需人工切节点</p>
+          </div>
+        </div>
+
+        <div class="sub-block-label">
+          <span>按网站定向避坑记录</span>
+          <span id="siteFailCount" style="color: var(--text-muted); font-weight: 500;">--</span>
+        </div>
+        <div id="siteFailuresBox"></div>
+
+        <div class="sub-block-label">
+          <span>全池冷却隔离中</span>
+          <span id="globalBlockCount" style="color: var(--text-muted); font-weight: 500;">--</span>
+        </div>
+        <div id="globalCooldownBox"></div>
+      </div>
+
+      <!-- Right: Top 8 Workhorse Nodes -->
+      <div class="bento-card">
+        <div class="section-head">
+          <div>
+            <div class="section-title-row">
+              <h2 class="section-title">主力专线实时实力榜</h2>
+              <span class="badge badge-green">实战 Top 8</span>
+            </div>
+            <p class="section-desc">按真实承担访问次数排序的主力线路，直观体现 AI 评分与峰值速度</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>专线节点</th>
+                <th>AI 评分</th>
+                <th>真实畅通率</th>
+                <th>实测峰值</th>
+              </tr>
+            </thead>
+            <tbody id="topNodesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 5: Compact Footer Subscription Strip -->
+    <section class="bento-card" style="padding: 15px 20px; margin-bottom: 12px;">
+      <div class="section-head" style="margin-bottom: 11px;">
+        <div class="section-title-row">
+          <h2 class="section-title" style="font-size: 15px;">服务商流量余量</h2>
+          <span class="badge badge-slate">多机场冗余</span>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted);">仅展示当前生效订阅，历史链式缓存可在数据明细中查看</span>
+      </div>
+      <div class="subs-grid" id="subsGrid"></div>
+    </section>
+
+    <footer class="page-footer" id="pageFooter">
+      数据源：正在连接主路由数据库...
+    </footer>
+  </div>
+
+  <!-- Slide-over Geek Drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+  <aside class="drawer-panel" id="drawerPanel" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-title">模型原始数据明细</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">完整节点统计、逐站点测速样本与策略组综合评级</div>
+      </div>
+      <button class="btn btn-secondary" type="button" onclick="closeDrawer()" aria-label="关闭明细">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        <span>关闭</span>
+      </button>
+    </div>
+
+    <div class="drawer-tools">
+      <div class="segmented" id="drawerTabs">
+        <button class="seg-btn active" type="button" onclick="setDrawerTab('nodes')">全部节点统计</button>
+        <button class="seg-btn" type="button" onclick="setDrawerTab('details')">原始连接明细</button>
+        <button class="seg-btn" type="button" onclick="setDrawerTab('subs')">完整订阅与策略评级</button>
+      </div>
+      <input type="text" class="search-input" id="drawerSearch" placeholder="搜索节点名称、目标域名或策略组..." oninput="renderDrawerBody()" />
+    </div>
+
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <script>
+    let appData = null;
+    let showAllSites = false;
+    let siteMode = 'best'; // best | tcp | udp
+    let mixMode = 'req';   // req | dl
+    let drawerOpen = false;
+    let drawerTab = 'nodes';
+    let sortKey = 'success';
+    let sortDesc = true;
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function fmtClock(ts) {
+      if (!ts) return '--:--:--';
+      const d = new Date(ts * 1000);
+      const p = n => String(n).padStart(2, '0');
+      return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    }
+
+    function fmtTime(ts) {
+      if (!ts) return '--';
+      const d = new Date(ts * 1000);
+      const p = n => String(n).padStart(2, '0');
+      return `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    function fmtDate(ts) {
+      if (!ts) return '不限时';
+      const d = new Date(ts * 1000);
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    function fmtMB(mb) {
+      if (!mb || mb <= 0) return '0 MB';
+      if (mb >= 1024) return (mb / 1024).toFixed(2) + ' GB';
+      return mb.toFixed(1) + ' MB';
+    }
+
+    function fmtRate(kbps) {
+      if (!kbps || kbps <= 0) return '0 KB/s';
+      if (kbps >= 1024) return (kbps / 1024).toFixed(1) + ' MB/s';
+      return kbps.toFixed(0) + ' KB/s';
+    }
+
+    function fmtCooldown(sec) {
+      if (!sec || sec <= 0) return '恢复中';
+      if (sec >= 3600) {
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        return m > 0 ? `${h}小时${m}分` : `${h}小时`;
+      }
+      if (sec >= 60) return `${Math.floor(sec / 60)}分钟`;
+      return `${sec}秒`;
+    }
+
+    function weightToScore(w) {
+      if (!w || w <= 0) return 0;
+      const capped = Math.min(Number(w), 1.25);
+      return Math.min(99, Math.max(35, Math.round((capped / 1.25) * 99)));
+    }
+
+    const PROVIDER_PALETTE = [
+      { color: '#16A34A', cls: 'c-0', pcls: 'p-0', badge: 'badge-green' },
+      { color: '#0066CC', cls: 'c-1', pcls: 'p-1', badge: 'badge-blue' },
+      { color: '#EA580C', cls: 'c-2', pcls: 'p-2', badge: 'badge-amber' },
+      { color: '#7C3AED', cls: 'c-3', pcls: 'p-3', badge: 'badge-blue' },
+      { color: '#0D9488', cls: 'c-4', pcls: 'p-4', badge: 'badge-green' },
+      { color: '#64748B', cls: 'c-5', pcls: 'p-5', badge: 'badge-slate' }
+    ];
+    let providerToneMap = {};
+
+    function rebuildProviderToneMap() {
+      providerToneMap = {};
+      const mix = (appData && appData.provider_mix) ? appData.provider_mix : [];
+      mix.forEach((p, idx) => {
+        providerToneMap[p.tag] = PROVIDER_PALETTE[idx % PROVIDER_PALETTE.length];
+      });
+    }
+
+    function providerTone(tag) {
+      if (providerToneMap[tag]) return providerToneMap[tag];
+      return PROVIDER_PALETTE[PROVIDER_PALETTE.length - 1];
+    }
+
+    function getSelectedGroup() {
+      return document.getElementById('groupFilter').value;
+    }
+
+    function onGroupChange() {
+      renderAll();
+    }
+
+    function setSiteMode(mode) {
+      siteMode = mode;
+      const btns = document.querySelectorAll('#protoSwitch .seg-btn');
+      const map = ['best', 'tcp', 'udp'];
+      btns.forEach((b, idx) => b.classList.toggle('active', map[idx] === mode));
+      renderSiteShowcase();
+    }
+
+    function setMixMode(mode) {
+      mixMode = mode;
+      const btns = document.querySelectorAll('#mixSwitch .seg-btn');
+      const map = ['req', 'dl'];
+      btns.forEach((b, idx) => b.classList.toggle('active', map[idx] === mode));
+      renderProviderSynergy();
+    }
+
+    function toggleAllSites() {
+      showAllSites = !showAllSites;
+      renderSiteShowcase();
+    }
+
+    function populateGroupFilter(groups) {
+      const sel = document.getElementById('groupFilter');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">全部策略组</option>' +
+        (groups || []).map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+      if ((groups || []).includes(cur)) sel.value = cur;
+    }
+
+    function renderHeaderAndKpis() {
+      if (!appData || !appData.ready) return;
+      const ov = appData.overview;
+      const sync = appData.sync;
+      const meta = appData.meta;
+
+      const dot = document.getElementById('syncDot');
+      const syncText = document.getElementById('syncText');
+      if (sync.last_sync_error) {
+        dot.className = 'dot err';
+        syncText.textContent = `同步异常：${sync.last_sync_error}`;
+      } else {
+        dot.className = 'dot';
+        syncText.textContent = `AI 护航中 · ${fmtClock(sync.last_sync_at)}`;
+      }
+
+      const rate = Number(ov.overall_success_rate || 0);
+      document.getElementById('kpiRate').textContent = rate.toFixed(2) + '%';
+      document.getElementById('kpiRateBar').style.width = Math.min(100, Math.max(0, rate)) + '%';
+      document.getElementById('kpiReqs').textContent = `已自动护航 ${(ov.total_success || 0).toLocaleString()} 次访问请求`;
+
+      const sitesCnt = ov.customized_sites ?? ov.prefetch_records ?? 0;
+      document.getElementById('kpiSites').textContent = `${sitesCnt.toLocaleString()} 站`;
+      document.getElementById('kpiSitesDesc').textContent = `覆盖 ${ov.group_count} 组策略，不同网站独立走最快线`;
+
+      const siteBlocks = ov.active_site_blocks || 0;
+      const globalNodes = ov.active_blocked_nodes || 0;
+      const guardedSites = ov.active_failure_targets || 0;
+      document.getElementById('kpiAvoid').textContent = `${siteBlocks} 次`;
+      if (siteBlocks > 0) {
+        const extra = globalNodes > 0 ? ` · 全局冷却 ${globalNodes} 线` : '';
+        document.getElementById('kpiAvoidDesc').textContent = `正为 ${guardedSites} 个常用网站绕开卡顿与报错线路${extra}`;
+      } else if (globalNodes > 0) {
+        document.getElementById('kpiAvoid').textContent = `${globalNodes} 线`;
+        document.getElementById('kpiAvoidDesc').textContent = `全池冷却隔离 ${globalNodes} 条异常节点`;
+      } else {
+        document.getElementById('kpiAvoidDesc').textContent = '全网通道畅通 · 暂无需要避坑线路';
+      }
+
+      document.getElementById('kpiTraffic').textContent = fmtMB(ov.total_download_mb);
+      const peakStr = ov.peak_download_mbs ? ` · 峰值 ${ov.peak_download_mbs} MB/s` : '';
+      document.getElementById('kpiPeakDesc').textContent = `${ov.node_count} 条活跃专线协同${peakStr}`;
+
+      document.getElementById('pageFooter').textContent =
+        `数据源：${sync.ros_host} · 数据库事务 #${meta.bbolt_txid} · 体积 ${meta.db_size_kb} KB · 每 ${sync.sync_interval} 秒自动后台刷新`;
+    }
+
+    function renderFlowMap() {
+      const grp = getSelectedGroup();
+      const sitesCol = document.getElementById('flowSitesCol');
+      const destCol = document.getElementById('flowDestCol');
+      const svg = document.getElementById('flowSvg');
+      const hubText = document.getElementById('hubStatText');
+      const ov = appData.overview;
+
+      let routes = [];
+      if (!grp && appData.flow_routes && appData.flow_routes.length) {
+        routes = appData.flow_routes.slice(0, 5);
+      } else {
+        const seen = new Set();
+        for (const item of (appData.site_showcase || [])) {
+          if (grp && item.group !== grp) continue;
+          if (seen.has(item.label) || !item.candidates || !item.candidates.length) continue;
+          seen.add(item.label);
+          const t1 = item.candidates[0];
+          routes.push({
+            label: item.label,
+            category: item.category,
+            group: item.group,
+            total_success: item.total_success,
+            total_download_mb: item.total_download_mb,
+            effective_blocked_count: item.effective_blocked_count || 0,
+            top_node: t1.node,
+            top_provider: t1.provider || '其他',
+            top_score: t1.score_100
+          });
+          if (routes.length >= 5) break;
+        }
+      }
+
+      hubText.textContent = `${ov.node_count} 条线优选`;
+
+      if (!routes.length) {
+        sitesCol.innerHTML = '<div class="flow-node"><span class="flow-node-sub">暂无样本</span></div>';
+        destCol.innerHTML = '';
+        svg.innerHTML = '';
+        return;
+      }
+
+      sitesCol.innerHTML = routes.map(r => {
+        const stat = r.total_download_mb >= 100
+          ? fmtMB(r.total_download_mb)
+          : `${(r.total_success || 0).toLocaleString()} 次`;
+        return `
+          <div class="flow-node site-pill" title="${esc(r.label)} · ${esc(r.group)}">
+            <div style="min-width:0;">
+              <div class="flow-node-title">${esc(r.label)}</div>
+              <div class="flow-node-sub">${esc(r.group)} · ${stat}</div>
+            </div>
+            <span class="badge badge-slate">${esc(r.category)}</span>
+          </div>
+        `;
+      }).join('');
+
+      const destCards = routes.map(r => {
+        const tone = providerTone(r.top_provider);
+        return `
+          <div class="flow-node dest-pill ${tone.pcls}" title="${esc(r.top_node)}">
+            <div style="min-width:0;">
+              <div class="flow-node-title">${esc(r.top_node)}</div>
+              <div class="flow-node-sub">AI 综合 ${r.top_score} 分${r.effective_blocked_count > 0 ? ' · 避坑 ' + r.effective_blocked_count + ' 线' : ''}</div>
+            </div>
+            <span class="badge ${tone.badge}">${esc(r.top_provider)}</span>
+          </div>
+        `;
+      });
+
+      const activeBlocks = ov.active_site_blocks || 0;
+      destCards.push(`
+        <div class="flow-node blocked-pill">
+          <div style="min-width:0;">
+            <div class="flow-node-title" style="color: #991B1B;">已自动拦截 ${activeBlocks} 处卡顿/报错线路</div>
+            <div class="flow-node-sub" style="color: #B91C1C;">守护 ${ov.active_failure_targets || 0} 个网站不走慢线</div>
+          </div>
+          <span class="badge badge-red">已避坑</span>
+        </div>
+      `);
+      destCol.innerHTML = destCards.join('');
+
+      // Draw crisp cubic Bezier paths matching the exact row centers
+      const n = routes.length;
+      const totalRight = n + 1;
+      const H = 320;
+      svg.setAttribute('viewBox', `0 0 760 ${H}`);
+      const cx = 344;
+      const cy = H / 2;
+      const leftX = 240;
+      const rightX = 448;
+
+      const paths = [];
+      for (let i = 0; i < n; i++) {
+        const ly = 36 + ((H - 72) * (i + 0.5)) / n;
+        const ry = 28 + ((H - 56) * (i + 0.5)) / totalRight;
+        const tone = providerTone(routes[i].top_provider);
+        // Left site -> Center AI Hub
+        paths.push(`<path class="flow-line anim" stroke="#93C5FD" d="M ${leftX} ${ly.toFixed(1)} C ${(leftX + 52)} ${ly.toFixed(1)}, ${(cx - 52)} ${cy}, ${cx - 46} ${cy}" />`);
+        // Center AI Hub -> Right winning provider line
+        paths.push(`<path class="flow-line anim" stroke="${tone.color}" d="M ${cx + 46} ${cy} C ${(cx + 92)} ${cy}, ${(rightX - 48)} ${ry.toFixed(1)}, ${rightX} ${ry.toFixed(1)}" />`);
+      }
+      // Blocked branch to bottom right pill
+      const by = 28 + ((H - 56) * (n + 0.5)) / totalRight;
+      paths.push(`<path class="flow-line blocked" d="M ${cx + 46} ${(cy + 14)} C ${(cx + 95)} ${(cy + 34)}, ${(rightX - 50)} ${by.toFixed(1)}, ${rightX} ${by.toFixed(1)}" />`);
+
+      svg.innerHTML = paths.join('');
+
+      const legendEl = document.getElementById('flowLegend');
+      const mix = (appData.provider_mix || []).slice(0, 5);
+      legendEl.innerHTML = mix.map(p => {
+        const t = providerTone(p.tag);
+        return `<span class="legend-item"><span class="legend-swatch" style="background: ${t.color};"></span>${esc(p.name)}</span>`;
+      }).join('') + `<span class="legend-item"><span class="legend-swatch" style="background: #EF4444;"></span>自动屏蔽烂线</span>`;
+    }
+
+    function renderProviderSynergy() {
+      const mix = appData.provider_mix || [];
+      const bar = document.getElementById('mixStackedBar');
+      const chips = document.getElementById('mixChips');
+      const lbl = document.getElementById('mixLabel');
+      const totEl = document.getElementById('mixTotalText');
+      const titleEl = document.getElementById('synergyTitle');
+      const ov = appData.overview;
+
+      titleEl.textContent = mix.length >= 2 ? `${mix.length} 家服务商协同混跑` : '多服务商协同混跑';
+
+      if (mixMode === 'req') {
+        lbl.textContent = '多机场实战请求分担比例';
+        totEl.textContent = `总计 ${(ov.total_success + ov.total_failure).toLocaleString()} 次`;
+      } else {
+        lbl.textContent = '多机场累计流量分担比例';
+        totEl.textContent = `总计 ${fmtMB(ov.total_download_mb)}`;
+      }
+
+      if (!mix.length) {
+        bar.innerHTML = '';
+        chips.innerHTML = '<div style="font-size:12px; color:var(--text-muted);">暂无多机场协同数据</div>';
+        return;
+      }
+
+      bar.innerHTML = mix.map(p => {
+        const pct = mixMode === 'req' ? p.req_pct : p.dl_pct;
+        const tone = providerTone(p.tag);
+        return `<div class="stack-seg ${tone.cls}" style="width: ${Math.max(pct, 1.5)}%" title="${esc(p.name)} ${pct}%"></div>`;
+      }).join('');
+
+      chips.innerHTML = mix.slice(0, 6).map(p => {
+        const pct = mixMode === 'req' ? p.req_pct : p.dl_pct;
+        const tone = providerTone(p.tag);
+        const detail = mixMode === 'req'
+          ? `${p.active_nodes} 线 · 畅通 ${p.success_rate}%`
+          : `${fmtMB(p.download_mb)} · 峰值 ${p.peak_mbs}M/s`;
+        return `
+          <div class="prov-chip">
+            <div class="prov-chip-head">
+              <span style="display:inline-flex;align-items:center;gap:5px;">
+                <span class="legend-swatch" style="background:${tone.color};"></span>${esc(p.tag)}
+              </span>
+              <span class="prov-chip-pct" style="color:${tone.color};">${pct.toFixed(1)}%</span>
+            </div>
+            <div class="prov-chip-sub">${detail}</div>
+          </div>
+        `;
+      }).join('');
+
+      const insBox = document.getElementById('insightsList');
+      const insights = appData.insights || [];
+      const badgeMap = { blue: 'badge-blue', green: 'badge-green', amber: 'badge-amber', red: 'badge-red' };
+      insBox.innerHTML = insights.map(it => `
+        <div class="insight-item t-${esc(it.tone || 'blue')}">
+          <span class="badge ${badgeMap[it.tone] || 'badge-blue'}" style="flex-shrink:0; margin-top:1px;">${esc(it.tag)}</span>
+          <span>${esc(it.text)}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderSiteShowcase() {
+      const container = document.getElementById('sitesGrid');
+      const toggleBtn = document.getElementById('toggleAllSitesBtn');
+      const badge = document.getElementById('showcaseBadge');
+      const grp = getSelectedGroup();
+
+      const allItems = (appData.site_showcase || []).filter(item => !grp || item.group === grp);
+      const filteredByMode = allItems.map(item => {
+        const mappedCands = (item.candidates || [])
+          .map(c => {
+            let w = c.raw_weight || 0;
+            if (siteMode === 'tcp') w = c.weight_tcp || 0;
+            else if (siteMode === 'udp') w = c.weight_udp || 0;
+            return { ...c, activeWeight: w, activeScore: weightToScore(w) };
+          })
+          .filter(c => siteMode === 'best' ? true : c.activeWeight > 0)
+          .sort((a, b) => (b.activeWeight - a.activeWeight) || (b.success - a.success));
+        return { ...item, viewCands: mappedCands };
+      }).filter(item => item.viewCands.length > 0);
+
+      // Deduplicate by site label in curated 6-card view so there are never duplicate site titles side-by-side
+      let shown;
+      if (showAllSites) {
+        shown = filteredByMode;
+        badge.textContent = `全部 ${filteredByMode.length} 站`;
+      } else {
+        const dedup = [];
+        const seen = new Set();
+        for (const item of filteredByMode) {
+          if (seen.has(item.label)) continue;
+          seen.add(item.label);
+          dedup.push(item);
+          if (dedup.length >= 6) break;
+        }
+        shown = dedup;
+        badge.textContent = `精选 ${shown.length} 大高频场景`;
+      }
+
+      if (filteredByMode.length <= 6) {
+        toggleBtn.classList.add('hidden');
+      } else {
+        toggleBtn.classList.remove('hidden');
+        toggleBtn.textContent = showAllSites
+          ? '收起至精选 6 站'
+          : `展开全部 ${filteredByMode.length} 站`;
+      }
+
+      if (!shown.length) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px;">当前筛选条件下暂无选路样本数据</div>';
+        return;
+      }
+
+      container.innerHTML = shown.map(site => {
+        const top3 = site.viewCands.slice(0, 3);
+        const totalReqs = site.total_success || 0;
+        const trafficText = site.total_download_mb >= 1 ? fmtMB(site.total_download_mb) : `${totalReqs} 次请求`;
+
+        const ladderHtml = top3.map((c, idx) => {
+          const isTop = idx === 0;
+          const rankLabel = isTop ? '首选' : `备选 ${idx + 1}`;
+          const score = c.activeScore;
+          const scoreText = score > 0 ? `${score} 分` : '实战启用';
+          const barWidth = score > 0 ? Math.max(12, score) : 45;
+          const srText = c.success > 0 ? ` · 成功率 ${c.success_rate}%` : '';
+          const tip = `${c.node} | AI 原始权重 ${c.activeWeight}${srText}`;
+
+          return `
+            <div class="cand-row ${isTop ? 'top1' : ''}" title="${esc(tip)}">
+              <div class="cand-left">
+                <span class="rank-tag ${isTop ? 'r1' : 'r-sub'}">${rankLabel}</span>
+                <span class="cand-name">${esc(c.node)}</span>
+              </div>
+              <div class="cand-right">
+                <div class="mini-bar"><div class="mini-bar-fill" style="width: ${barWidth}%"></div></div>
+                <span class="score-num">${scoreText}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const effAvoid = site.effective_blocked_count ?? site.active_blocked_count ?? 0;
+        const siteSr = Number(site.success_rate ?? 100);
+        let footRight;
+        if (effAvoid > 0) {
+          footRight = `<span class="badge badge-red">已自动绕开 ${effAvoid} 条卡顿线</span>`;
+        } else if (siteSr >= 99.5 && totalReqs >= 50) {
+          footRight = `<span class="badge badge-green">${siteSr.toFixed(1)}% 零卡稳连</span>`;
+        } else if (site.total_download_mb >= 1024) {
+          footRight = `<span class="badge badge-green">流畅加速 ${fmtMB(site.total_download_mb)}</span>`;
+        } else {
+          footRight = `<span style="color: var(--green); font-weight: 600;">畅通率 ${siteSr.toFixed(1)}%</span>`;
+        }
+
+        return `
+          <article class="site-card" title="规则标识：${esc(site.target)}">
+            <div>
+              <div class="site-top">
+                <div>
+                  <div class="site-name">${esc(site.label)}</div>
+                  <div class="site-tags">
+                    <span class="badge badge-slate">${esc(site.category)}</span>
+                    <span class="badge badge-blue">${esc(site.group)}</span>
+                  </div>
+                </div>
+                <div class="site-traffic">
+                  <strong>${totalReqs.toLocaleString()} 次</strong>
+                  <span>${trafficText}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ladder">${ladderHtml}</div>
+
+            <div class="site-foot">
+              <span>已评估 ${site.candidate_count} 条候选专线</span>
+              ${footRight}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderAvoidSection() {
+      const grp = getSelectedGroup();
+      const siteBox = document.getElementById('siteFailuresBox');
+      const poolBox = document.getElementById('globalCooldownBox');
+      const siteCountEl = document.getElementById('siteFailCount');
+      const poolCountEl = document.getElementById('globalBlockCount');
+      const badgeEl = document.getElementById('avoidSummaryBadge');
+
+      const activeFails = (appData.failures || []).filter(f =>
+        (!grp || f.group === grp) && (f.active_count > 0)
+      );
+      const globalBlocked = (appData.node_states || []).filter(s =>
+        (!grp || s.group === grp) && s.is_blocked
+      );
+
+      siteCountEl.textContent = activeFails.length > 0 ? `${activeFails.length} 个站点受保护中` : '全部通畅';
+      poolCountEl.textContent = globalBlocked.length > 0 ? `${globalBlocked.length} 个节点冷却中` : '无全局熔断';
+
+      const totalActive = activeFails.length + globalBlocked.length;
+      if (totalActive > 0) {
+        badgeEl.className = 'badge badge-amber';
+        badgeEl.textContent = '护航拦截中';
+      } else {
+        badgeEl.className = 'badge badge-green';
+        badgeEl.textContent = '全网零异常';
+      }
+
+      if (!activeFails.length) {
+        siteBox.innerHTML = `
+          <div class="health-banner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>当前全部网站访问通畅，暂无触发定向避坑的故障线路</span>
+          </div>
+        `;
+      } else {
+        const shownFails = activeFails.slice(0, 5);
+        siteBox.innerHTML = `<div class="fail-list">` + shownFails.map(f => {
+          const activeNodes = (f.blocked_nodes || []).filter(b => b.active);
+          const pills = activeNodes.slice(0, 3).map(b => `
+            <span class="block-pill" title="${esc(b.node)}">
+              <span class="bn">${esc(b.node)}</span>
+              <span>${fmtCooldown(b.remaining_sec)}</span>
+            </span>
+          `).join('');
+          const more = activeNodes.length > 3
+            ? `<span class="badge badge-slate">另有 ${activeNodes.length - 3} 个</span>`
+            : '';
+
+          return `
+            <div class="fail-item" title="目标规则：${esc(f.target)}">
+              <div class="fail-item-top">
+                <div class="fail-site">
+                  <span>${esc(f.label || f.target)}</span>
+                  <span class="badge badge-slate">${esc(f.group)}</span>
+                </div>
+                <span class="badge badge-red">避开 ${f.active_count} 个节点</span>
+              </div>
+              <div class="fail-pills">${pills}${more}</div>
+            </div>
+          `;
+        }).join('') + `</div>`;
+      }
+
+      if (!globalBlocked.length) {
+        poolBox.innerHTML = `
+          <div style="font-size: 12.5px; color: var(--text-muted); padding: 6px 2px;">
+            全节点池健康运行中，暂无处于全局熔断冷却期的线路。
+          </div>
+        `;
+      } else {
+        const shownPool = globalBlocked.slice(0, 8);
+        const extraPool = globalBlocked.length > 8
+          ? `<span class="badge badge-slate">另有 ${globalBlocked.length - 8} 个节点冷却中</span>`
+          : '';
+        poolBox.innerHTML = `<div class="cooldown-pool">` + shownPool.map(n => `
+          <span class="cool-chip" title="${esc(n.group)} - ${esc(n.node)}">
+            <span>${esc(n.node)}</span>
+            <strong style="font-weight: 700;">${fmtCooldown(n.cooldown_sec)}</strong>
+          </span>
+        `).join('') + extraPool + `</div>`;
+      }
+    }
+
+    function renderTopNodes() {
+      const grp = getSelectedGroup();
+      const tbody = document.getElementById('topNodesBody');
+      const rows = (appData.node_aggregates || [])
+        .filter(n => !grp || n.group === grp)
+        .slice()
+        .sort((a, b) => (b.success - a.success) || (b.avg_tcp_weight - a.avg_tcp_weight))
+        .slice(0, 8);
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 28px;">暂无活跃专线战绩数据</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map((n, i) => {
+        const score = n.score_100 ?? weightToScore(Math.max(n.avg_tcp_weight || 0, n.avg_udp_weight || 0));
+        const srClass = n.success_rate >= 98 ? 'badge-green' : (n.success_rate >= 94 ? 'badge-amber' : 'badge-red');
+        const barW = score > 0 ? Math.max(15, score) : 10;
+
+        return `
+          <tr>
+            <td>
+              <div class="node-rank-cell">
+                <span class="idx-pill ${i < 3 ? 'top3' : ''}">${i + 1}</span>
+                <div>
+                  <div class="node-main">${esc(n.node)}</div>
+                  <div class="node-sub">${esc(n.group)} · 覆盖 ${n.target_count} 站</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="score-inline" title="TCP 权重 ${n.avg_tcp_weight} / UDP 权重 ${n.avg_udp_weight}">
+                <div class="score-bar-lg"><div class="score-bar-lg-fill" style="width: ${barW}%"></div></div>
+                <strong style="font-size: 12.5px; color: var(--blue); white-space: nowrap;">${score > 0 ? score + ' 分' : '--'}</strong>
+              </div>
+            </td>
+            <td>
+              <span class="badge ${srClass}">${n.success_rate.toFixed(1)}%</span>
+              <div class="node-sub">${n.success.toLocaleString()} 次成功</div>
+            </td>
+            <td>
+              <strong style="font-size: 13px; color: var(--text-primary);">${fmtRate(n.max_download_rate)}</strong>
+              <div class="node-sub">累计 ${fmtMB(n.download_mb)}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSubscriptions() {
+      const box = document.getElementById('subsGrid');
+      const allSubs = appData.subscriptions || [];
+      const activeSubs = allSubs.filter(s => !s.is_legacy);
+      const shown = activeSubs.length ? activeSubs : allSubs;
+
+      if (!shown.length) {
+        box.innerHTML = '<div style="grid-column: 1 / -1; color: var(--text-muted); font-size: 12.5px;">暂无订阅流量信息</div>';
+        return;
+      }
+
+      box.innerHTML = shown.map(s => {
+        const cls = s.percent >= 90 ? 'crit' : (s.percent >= 75 ? 'warn' : '');
+        return `
+          <div class="sub-strip">
+            <div class="sub-strip-top">
+              <span class="sub-strip-name">${esc(s.name)}</span>
+              <span class="sub-strip-pct">${s.percent.toFixed(1)}%</span>
+            </div>
+            <div class="sub-bar">
+              <div class="sub-bar-fill ${cls}" style="width: ${Math.min(100, s.percent)}%"></div>
+            </div>
+            <div class="sub-strip-foot">
+              <span>已用 ${s.used_gb} GB / ${s.total_gb} GB</span>
+              <span>到期 ${fmtDate(s.expire)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* Slide-Over Geek Drawer */
+    function openDrawer() {
+      drawerOpen = true;
+      document.getElementById('drawerBackdrop').classList.add('open');
+      document.getElementById('drawerPanel').classList.add('open');
+      document.getElementById('drawerPanel').setAttribute('aria-hidden', 'false');
+      renderDrawerBody();
+    }
+
+    function closeDrawer() {
+      drawerOpen = false;
+      document.getElementById('drawerBackdrop').classList.remove('open');
+      document.getElementById('drawerPanel').classList.remove('open');
+      document.getElementById('drawerPanel').setAttribute('aria-hidden', 'true');
+    }
+
+    function setDrawerTab(tab) {
+      drawerTab = tab;
+      const btns = document.querySelectorAll('#drawerTabs .seg-btn');
+      const map = ['nodes', 'details', 'subs'];
+      btns.forEach((b, idx) => b.classList.toggle('active', map[idx] === tab));
+      renderDrawerBody();
+    }
+
+    function setSort(key) {
+      if (sortKey === key) sortDesc = !sortDesc;
+      else {
+        sortKey = key;
+        sortDesc = true;
+      }
+      renderDrawerBody();
+    }
+
+    function renderDrawerBody() {
+      if (!drawerOpen || !appData || !appData.ready) return;
+      const body = document.getElementById('drawerBody');
+      const grp = getSelectedGroup();
+      const q = document.getElementById('drawerSearch').value.trim().toLowerCase();
+
+      if (drawerTab === 'nodes') {
+        const rows = (appData.node_aggregates || [])
+          .filter(n => (!grp || n.group === grp) && (!q || n.node.toLowerCase().includes(q) || n.group.toLowerCase().includes(q)))
+          .slice()
+          .sort((a, b) => {
+            const va = Number(a[sortKey] || 0);
+            const vb = Number(b[sortKey] || 0);
+            return sortDesc ? vb - va : va - vb;
+          });
+
+        body.innerHTML = `
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">共 ${rows.length} 条评估节点记录（点击表头可排序）</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>策略组</th>
+                  <th>节点名称</th>
+                  <th class="sortable" onclick="setSort('avg_tcp_weight')">TCP / UDP 权重</th>
+                  <th class="sortable" onclick="setSort('success')">成功 / 失败</th>
+                  <th class="sortable" onclick="setSort('success_rate')">畅通率</th>
+                  <th class="sortable" onclick="setSort('avg_connect_ms')">平均握手</th>
+                  <th class="sortable" onclick="setSort('max_download_rate')">峰值速度</th>
+                  <th class="sortable" onclick="setSort('download_mb')">累计下载</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(n => `
+                  <tr>
+                    <td><span class="badge badge-slate">${esc(n.group)}</span></td>
+                    <td style="font-weight: 600;">${esc(n.node)}</td>
+                    <td><strong style="color: var(--blue);">${n.avg_tcp_weight}</strong> / ${n.avg_udp_weight}</td>
+                    <td><span style="color: var(--green); font-weight: 600;">${n.success}</span> / <span style="color: ${n.failure ? 'var(--red)' : 'var(--text-muted)'};">${n.failure}</span></td>
+                    <td>${n.success_rate.toFixed(1)}%</td>
+                    <td>${n.avg_connect_ms} ms</td>
+                    <td>${fmtRate(n.max_download_rate)}</td>
+                    <td>${fmtMB(n.download_mb)}</td>
+                    <td>${n.is_blocked ? '<span class="badge badge-red">冷却中</span>' : '<span class="badge badge-green">正常</span>'}</td>
+                  </tr>
+                `).join('') || '<tr><td colspan="9" style="text-align:center; padding: 24px; color: var(--text-muted);">无匹配节点</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else if (drawerTab === 'details') {
+        const rows = (appData.stats_detail || [])
+          .filter(d => (!grp || d.group === grp) && (!q || d.node.toLowerCase().includes(q) || d.target.toLowerCase().includes(q) || d.group.toLowerCase().includes(q)))
+          .slice(0, 200);
+
+        body.innerHTML = `
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">展示最近活跃的 ${rows.length} 条站点配对明细</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>策略组</th>
+                  <th>目标规则或域名</th>
+                  <th>节点</th>
+                  <th>成功 / 失败</th>
+                  <th>TCP / UDP 权重</th>
+                  <th>握手 / 延迟</th>
+                  <th>下载 / 峰值</th>
+                  <th>最后活跃</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map(d => `
+                  <tr>
+                    <td><span class="badge badge-slate">${esc(d.group)}</span></td>
+                    <td style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;">${esc(d.target)}</td>
+                    <td>${esc(d.node)}</td>
+                    <td>${d.success} / ${d.failure}</td>
+                    <td><strong style="color: var(--blue);">${d.weight_tcp}</strong> / ${d.weight_udp}</td>
+                    <td>${d.connect_time} / ${d.latency} ms</td>
+                    <td>${fmtMB(d.download_mb)} · ${fmtRate(d.max_download_rate)}</td>
+                    <td style="color: var(--text-muted);">${fmtTime(d.last_used)}</td>
+                  </tr>
+                `).join('') || '<tr><td colspan="8" style="text-align:center; padding: 24px; color: var(--text-muted);">无匹配明细</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        const allSubs = appData.subscriptions || [];
+        const ranks = (appData.rankings || []).filter(r => !grp || r.group === grp);
+        const rankMap = { MostUsed: '主力首选', OccasionalUsed: '常用备选', RarelyUsed: '偶发兜底' };
+
+        body.innerHTML = `
+          <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">全部机场订阅缓存（含历史链式记录）</div>
+          <div class="subs-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 18px;">
+            ${allSubs.map(s => `
+              <div class="sub-strip">
+                <div class="sub-strip-top">
+                  <span class="sub-strip-name">${esc(s.name)} ${s.is_legacy ? '<span class="badge badge-slate" style="margin-left: 4px;">历史缓存</span>' : ''}</span>
+                  <span class="sub-strip-pct">${s.percent.toFixed(1)}%</span>
+                </div>
+                <div class="sub-bar"><div class="sub-bar-fill ${s.percent >= 90 ? 'crit' : (s.percent >= 75 ? 'warn' : '')}" style="width: ${Math.min(100, s.percent)}%"></div></div>
+                <div class="sub-strip-foot">
+                  <span>已用 ${s.used_gb} GB / ${s.total_gb} GB</span>
+                  <span>到期 ${fmtDate(s.expire)}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="font-size: 13px; font-weight: 700;">策略组周期性综合评级</div>
+          <div class="rank-grid">
+            ${ranks.map(r => `
+              <div class="rank-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <strong style="font-size: 13.5px;">${esc(r.group)}</strong>
+                  <span style="font-size: 11.5px; color: var(--text-muted);">更新 ${fmtTime(r.last_updated)}</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  ${(r.items || []).slice(0, 10).map((it, idx) => `
+                    <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px;">
+                      <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${idx + 1}. ${esc(it.node)}</span>
+                      <span style="white-space: nowrap; color: var(--text-secondary);">${rankMap[it.rank] || esc(it.rank)} · ${it.weight}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('') || '<div style="color: var(--text-muted); font-size: 12.5px;">暂无策略评级数据</div>'}
+          </div>
+        `;
+      }
+    }
+
+    function renderAll() {
+      if (!appData || !appData.ready) return;
+      rebuildProviderToneMap();
+      populateGroupFilter(appData.overview.groups);
+      renderHeaderAndKpis();
+      renderFlowMap();
+      renderProviderSynergy();
+      renderSiteShowcase();
+      renderAvoidSection();
+      renderTopNodes();
+      renderSubscriptions();
+      if (drawerOpen) renderDrawerBody();
+    }
+
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/data', { cache: 'no-store' });
+        appData = await res.json();
+        renderAll();
+      } catch (err) {
+        document.getElementById('syncDot').className = 'dot err';
+        document.getElementById('syncText').textContent = '连接后端失败';
+      }
+    }
+
+    async function triggerSync() {
+      const btn = document.getElementById('syncBtn');
+      const icon = document.getElementById('syncIcon');
+      btn.disabled = true;
+      icon.classList.add('spin');
+      try {
+        const res = await fetch('/api/sync', { method: 'POST' });
+        appData = await res.json();
+        renderAll();
+      } catch (err) {
+        document.getElementById('syncDot').className = 'dot err';
+        document.getElementById('syncText').textContent = '同步请求失败';
+      } finally {
+        btn.disabled = false;
+        icon.classList.remove('spin');
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && drawerOpen) closeDrawer();
+    });
+
+    fetchData();
+    setInterval(fetchData, 60000);
+  </script>
+</body>
+</html>
