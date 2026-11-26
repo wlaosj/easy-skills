@@ -38,8 +38,8 @@
   <rect x="444" y="84" width="124" height="32" rx="16" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.2"/>
   <text x="506" y="105" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="13" font-weight="700" fill="#0066CC">OPEN SOURCE</text>
 
-  <text x="188" y="156" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="21" font-weight="600" fill="#334155">把复杂交给 AI，让一切变得 Easy</text>
-  <text x="188" y="188" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14.5" font-weight="500" fill="#64748B">One prompt away — battle-tested AI Agent Skills that make complex setups effortless.</text>
+  <text x="188" y="156" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="22" font-weight="700" fill="#0F172A">「烧了那么多 Token，总得留下点什么。」</text>
+  <text x="188" y="188" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="14.5" font-weight="500" fill="#64748B">Burned millions of tokens, might as well leave something behind.</text>
 
   <g transform="translate(188, 212)">
     <rect x="0" y="0" width="128" height="32" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
