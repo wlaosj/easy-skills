@@ -1,0 +1,12 @@
+services:
+  ps4-host:
+    image: nginx:alpine
+    container_name: ps4-host
+    restart: unless-stopped
+    ports:
+      - "{{HOST_PORT}}:80"
+    volumes:
+      - "{{PS4_CONFIG_DIR}}/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "{{PS4_WEB_DIR}}:/usr/share/nginx/html:ro"
+      # 可选：挂载本地 PS4 游戏目录用于 /games/ 局域网高速分发（不需要可注释）
+      - "{{PS4_GAMES_DIR}}:/srv/ps4_games:ro"

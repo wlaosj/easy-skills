@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" width="920" height="420" role="img" aria-label="PS4 Local Host Architecture">
+  <defs>
+    <filter id="cardShadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#15803D"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#DC2626"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="420" rx="18" fill="#F6F8FA"/>
+  <rect x="1" y="1" width="918" height="418" rx="17" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="36" y="44" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif" font-size="20" font-weight="700" fill="#1F2328">PS4 局域网离线托管与防误升隔离架构</text>
+  <text x="36" y="66" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12.5" fill="#64748B">先断外网 · 再联内网 · 只读挂载 · 零公网依赖</text>
+  <rect x="748" y="28" width="136" height="28" rx="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+  <text x="816" y="46" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="11.5" font-weight="600" fill="#0066CC">ps4-local-host</text>
+
+  <!-- Card 1: PS4 Console (Left) -->
+  <g filter="url(#cardShadow)">
+    <rect x="36" y="128" width="228" height="210" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+  </g>
+  <rect x="56" y="148" width="68" height="22" rx="6" fill="#F1F5F9"/>
+  <text x="90" y="163" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#334155">客户端设备</text>
+  <text x="56" y="196" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif" font-size="18" font-weight="700" fill="#1F2328">PS4 主机</text>
+  <text x="56" y="218" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12" fill="#64748B">Wi-Fi / LAN 固定内网 IP</text>
+
+  <line x1="56" y1="236" x2="244" y2="236" stroke="#F1F5F9" stroke-width="1"/>
+  <text x="56" y="258" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12" fill="#334155">• 浏览器访问内网托管页</text>
+  <text x="56" y="280" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12" fill="#334155">• 局域网满速拉取 /games/</text>
+  <text x="56" y="302" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12" fill="#334155">• 本机关闭自动下载更新</text>
+
+  <!-- Card 2: WAN Blocked (Top Right) -->
+  <g filter="url(#cardShadow)">
+    <rect x="520" y="96" width="364" height="106" rx="16" fill="#FFFFFF" stroke="#FECACA" stroke-width="1.4"/>
+  </g>
+  <rect x="540" y="114" width="96" height="22" rx="6" fill="#FEF2F2"/>
+  <text x="588" y="129" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#DC2626">外网完全阻断</text>
+  <text x="540" y="160" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif" font-size="16" font-weight="700" fill="#1F2328">公网 / 系统更新服务器</text>
+  <text x="540" y="182" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="12" fill="#64748B">无有效网关 · RouterOS DROP · OpenWrt DROP 三选一</text>
+
+  <!-- Card 3: Docker Host (Bottom Right) -->
+  <g filter="url(#cardShadow)">
+    <rect x="520" y="224" width="364" height="162" rx="16" fill="#FFFFFF" stroke="#BBF7D0" stroke-width="1.4"/>
+  </g>
+  <rect x="540" y="242" width="126" height="22" rx="6" fill="#F0FDF4"/>
+  <text x="603" y="257" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif" font-size="11" font-weight="600" fill="#15803D">局域网高速直连</text>
+  <text x="540" y="286" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', sans-serif" font-size="16.5" font-weight="700" fill="#1F2328">NAS / Docker 宿主机 (nginx:alpine)</text>
+  <text x="540" y="308" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#0066CC">http://{{HOST_IP}}:8090</text>
+
+  <rect x="540" y="322" width="154" height="46" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="552" y="341" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="600" fill="#1F2328">/ (HTML + .mjs)</text>
+  <text x="552" y="358" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="11" fill="#64748B">离线静态托管 · 只读挂载</text>
+
+  <rect x="706" y="322" width="158" height="46" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="718" y="341" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="600" fill="#1F2328">/games/ (autoindex)</text>
+  <text x="718" y="358" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="11" fill="#64748B">sendfile 满速分发 · 只读</text>
+
+  <!-- Path 1: Blocked WAN Path -->
+  <path d="M 264 195 C 340 195, 360 148, 510 148" fill="none" stroke="#DC2626" stroke-width="2.2" stroke-dasharray="6 5" marker-end="url(#arrowRed)"/>
+  <rect x="334" y="132" width="114" height="32" rx="16" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+  <text x="391" y="152" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="11.5" font-weight="700" fill="#DC2626">硬拦截 · 零外网</text>
+
+  <!-- Path 2: Allowed LAN Path -->
+  <path d="M 264 275 C 340 275, 360 305, 510 305" fill="none" stroke="#15803D" stroke-width="2.4" marker-end="url(#arrowGreen)"/>
+  <rect x="328" y="287" width="126" height="32" rx="16" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.2"/>
+  <text x="391" y="307" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="11.5" font-weight="700" fill="#15803D">二层直连 · 5MiB内存</text>
+
+  <!-- Footer note -->
+  <text x="36" y="402" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif" font-size="11" fill="#94A3B8">Compatible with Unraid · Synology · fnOS · Proxmox LXC · OpenWrt · RouterOS · Any Home Router</text>
+</svg>
