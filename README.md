@@ -2,8 +2,7 @@
 
 <img src="assets/banner.svg" alt="Easy Skills Banner" width="100%" />
 
-<h3>「烧了那么多 Token，总得留下点什么。」</h3>
-<p><sub>Burned millions of tokens, might as well leave something behind.</sub></p>
+<br />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-0066CC?style=flat-square)](LICENSE)
 [![Agent Compatible](https://img.shields.io/badge/Agents-Antigravity%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20Codex-15803D?style=flat-square)](#一句话极速上手)
