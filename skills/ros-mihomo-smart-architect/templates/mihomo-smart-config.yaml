@@ -1,14 +1,16 @@
 # Mihomo Smart (LightGBM) 标准化脱敏配置模板
-# 使用说明：部署前请替换 {{ROS_IP}}、{{MIHOMO_SECRET}}、{{PROXY_AUTH_PASS}} 及 {{PROVIDER_*_URL}} 占位符
+# 使用说明：
+#   1. 替换 {{ROS_IP}}、{{MIHOMO_SECRET}}、{{PROXY_AUTH_PASS}}、{{PROVIDER_1_URL}}
+#   2. 默认按「单机场开箱即用」配置；若接入多家机场，取消 第二服务 / 第三服务 及对应 线路二 / 线路三 注释，并加入策略组列表即可
 
 hosts:
   "ros.local": {{ROS_IP}}
 
 # ==================== 锚点配置 ====================
+# 注意：proxy-providers 默认直连拉取，避免首次启动时尚无可用代理导致死锁
 BaseProvider: &BaseProvider
   type: http
   interval: 86400
-  proxy: 默认代理
   health-check: { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 }
   filter: "^(?!.*(群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|过滤|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author))"
 
@@ -22,10 +24,10 @@ FilterUS: &FilterUS "^(?=.*(?i)(美|🇺🇸|US|USA|JFK|LAX|ORD|ATL|DFW|SFO|MIA|
 FilterTW: &FilterTW "^(?=.*(?i)(台|🇼🇸|🇹🇼|TW|tai|TPE|TSA|KHH))(?!.*(5x|流量|到期|过滤|下载专用)).*$"
 FilterAL: &FilterAL "^(?!.*(DIRECT|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|过滤|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author))"
 
-SelectPY: &SelectPY { type: select, proxies: [默认代理, 线路一, 香港策略, 狮城策略, 日本策略, 线路二, 线路三, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动, DIRECT] }
-SelectUS: &SelectUS { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 全球手动, 故障转移, 香港策略, 韩国策略, 台湾策略, DIRECT] }
-SelectGG: &SelectGG { type: select, proxies: [默认代理, 香港策略, 线路一, 日本策略, 狮城策略, 线路二, 线路三, 美国策略, 韩国策略, 台湾策略, 故障转移, 全球手动, DIRECT] }
-SelectTT: &SelectTT { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 台湾策略, 线路一, 线路二, 线路三, 全球手动, 故障转移, 香港策略, DIRECT] }
+SelectPY: &SelectPY { type: select, proxies: [默认代理, 线路一, 香港策略, 狮城策略, 日本策略, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动, DIRECT] }
+SelectUS: &SelectUS { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 线路一, 全球手动, 故障转移, 香港策略, 韩国策略, 台湾策略, DIRECT] }
+SelectGG: &SelectGG { type: select, proxies: [默认代理, 香港策略, 线路一, 日本策略, 狮城策略, 美国策略, 韩国策略, 台湾策略, 故障转移, 全球手动, DIRECT] }
+SelectTT: &SelectTT { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 台湾策略, 线路一, 全球手动, 故障转移, 香港策略, DIRECT] }
 
 # ==================== 可选自建节点 ====================
 proxies: []
@@ -162,12 +164,13 @@ dns:
 
 # ==================== Smart 策略组 ====================
 proxy-groups:
+  # 严格按已启用的 proxy-providers 数量启用对应线路组（避免 0 节点 Smart 组启动报错）
   - { name: 线路一, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务一\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
-  - { name: 线路二, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务二\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
-  - { name: 线路三, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务三\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
+  # - { name: 线路二, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务二\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
+  # - { name: 线路三, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务三\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
 
-  - { name: 默认代理, type: select, proxies: [香港策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 故障转移, 美国策略, 全球手动, DIRECT] }
-  - { name: 兜底流量, type: select, proxies: [默认代理, DIRECT, 香港策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动] }
+  - { name: 默认代理, type: select, proxies: [香港策略, 狮城策略, 日本策略, 线路一, 故障转移, 美国策略, 全球手动, DIRECT] }
+  - { name: 兜底流量, type: select, proxies: [默认代理, DIRECT, 香港策略, 狮城策略, 日本策略, 线路一, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动] }
   - { name: 故障转移, <<: *BaseFB, proxies: [狮城策略, 日本策略, 台湾策略, 香港策略, 韩国策略, 美国策略, 全球手动, DIRECT] }
   - { name: 抖快书定位, type: select, proxies: [DIRECT, 香港策略, 台湾策略, 狮城策略, 日本策略, 韩国策略, 美国策略] }
 
