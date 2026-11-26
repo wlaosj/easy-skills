@@ -1,0 +1,293 @@
+# Mihomo Smart (LightGBM) 标准化脱敏配置模板
+# 使用说明：部署前请替换 {{ROS_IP}}、{{MIHOMO_SECRET}}、{{PROXY_AUTH_PASS}} 及 {{PROVIDER_*_URL}} 占位符
+
+hosts:
+  "ros.local": {{ROS_IP}}
+
+# ==================== 锚点配置 ====================
+BaseProvider: &BaseProvider
+  type: http
+  interval: 86400
+  proxy: 默认代理
+  health-check: { enable: true, url: "https://www.gstatic.com/generate_204", interval: 300 }
+  filter: "^(?!.*(群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|过滤|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author))"
+
+BaseFB: &BaseFB { type: fallback, interval: 120, lazy: true, url: "https://www.gstatic.com/generate_204" }
+
+FilterHK: &FilterHK "^(?=.*(?i)(港|🇭🇰|HK|Hong|HKG))(?!.*(5x|x0\\.8|流量|到期|过滤|下载专用)).*$"
+FilterSG: &FilterSG "^(?=.*(?i)(坡|🇸🇬|SG|Sing|SIN|XSP))(?!.*(5x|流量|到期|过滤|下载专用)).*$"
+FilterJP: &FilterJP "^(?=.*(?i)(日|🇯🇵|JP|Japan|NRT|HND|KIX|CTS|FUK))(?!.*(5x|流量|到期|过滤|下载专用)).*$"
+FilterKR: &FilterKR "^(?=.*(?i)(韩|🇰🇷|韓|首尔|南朝鲜|KR|KOR|Korea|South))(?!.*(5x|流量|到期|过滤|下载专用)).*$"
+FilterUS: &FilterUS "^(?=.*(?i)(美|🇺🇸|US|USA|JFK|LAX|ORD|ATL|DFW|SFO|MIA|SEA|IAD))(?!.*(5x|x1\\.5|流量|到期|过滤|下载专用)).*$"
+FilterTW: &FilterTW "^(?=.*(?i)(台|🇼🇸|🇹🇼|TW|tai|TPE|TSA|KHH))(?!.*(5x|流量|到期|过滤|下载专用)).*$"
+FilterAL: &FilterAL "^(?!.*(DIRECT|群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|过滤|USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author))"
+
+SelectPY: &SelectPY { type: select, proxies: [默认代理, 线路一, 香港策略, 狮城策略, 日本策略, 线路二, 线路三, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动, DIRECT] }
+SelectUS: &SelectUS { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 全球手动, 故障转移, 香港策略, 韩国策略, 台湾策略, DIRECT] }
+SelectGG: &SelectGG { type: select, proxies: [默认代理, 香港策略, 线路一, 日本策略, 狮城策略, 线路二, 线路三, 美国策略, 韩国策略, 台湾策略, 故障转移, 全球手动, DIRECT] }
+SelectTT: &SelectTT { type: select, proxies: [默认代理, 美国策略, 狮城策略, 日本策略, 台湾策略, 线路一, 线路二, 线路三, 全球手动, 故障转移, 香港策略, DIRECT] }
+
+# ==================== 可选自建节点 ====================
+proxies: []
+  # 示例：如需加入自建 VLESS-Reality 专线，取消注释并填入真实参数（同时将 VPS IP 加入 ROS MY_INFRA_DIRECT）
+  # - name: "自建美西_Reality"
+  #   type: vless
+  #   server: {{VPS_IP}}
+  #   port: 443
+  #   uuid: {{VPS_UUID}}
+  #   network: tcp
+  #   tls: true
+  #   udp: true
+  #   flow: xtls-rprx-vision
+  #   servername: {{REALITY_SNI}}
+  #   client-fingerprint: chrome
+  #   reality-opts:
+  #     public-key: {{VPS_REALITY_PUBKEY}}
+  #     short-id: {{VPS_REALITY_SHORTID}}
+
+# ==================== 机场订阅 (支持多服务商混跑) ====================
+proxy-providers:
+  第一服务: { <<: *BaseProvider, url: "{{PROVIDER_1_URL}}", override: { additional-prefix: "[服务一] " } }
+  # 第二服务: { <<: *BaseProvider, url: "{{PROVIDER_2_URL}}", override: { additional-prefix: "[服务二] " } }
+  # 第三服务: { <<: *BaseProvider, url: "{{PROVIDER_3_URL}}", override: { additional-prefix: "[服务三] " } }
+
+# ==================== 核心配置 ====================
+mode: rule
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+ipv6: false
+allow-lan: true
+unified-delay: true
+tcp-concurrent: true
+log-level: warning
+bind-address: "*"
+find-process-mode: off
+geodata-mode: true
+geodata-loader: memconservative
+geosite-matcher: mph
+geox-url:
+  geoip: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb"
+geo-auto-update: true
+geo-update-interval: 72
+keep-alive-interval: 30
+keep-alive-idle: 600
+
+authentication:
+  - "admin:{{PROXY_AUTH_PASS}}"
+skip-auth-prefixes:
+  - 192.168.0.0/16
+  - 10.0.0.0/8
+  - 172.16.0.0/12
+  - 127.0.0.1/8
+
+experimental:
+  quic-go-disable-gso: false
+
+external-ui: ui
+external-ui-name: zashboard
+external-ui-url: "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+external-controller: "0.0.0.0:9090"
+secret: "{{MIHOMO_SECRET}}"
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    TLS: { ports: [443, 8443] }
+    HTTP: { ports: [80, 8080-8888], override-destination: true }
+
+tun:
+  enable: true
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+  auto-redirect: true
+  mtu: 1400
+  udp-timeout: 300
+  route-exclude-address:
+    - 192.168.0.0/16
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 127.0.0.0/8
+
+dns:
+  enable: true
+  listen: "0.0.0.0:53"
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  store-fake-ip: true
+  cache-size: 8192
+  cache-algorithm: arc
+  ttl-max: 1800
+  respect-rules: true
+  concurrent: true
+  stale-cache: true
+  fake-ip-filter:
+    - "+.tailscale.com"
+    - "+.tailscale.io"
+    - "+.ts.net"
+    - "*.ntp.org"
+    - "*.ntp.org.cn"
+    - "*.bilivideo.com"
+    - "*.bilibili.com"
+    - "geosite:cn"
+    - "geosite:apple@cn"
+  default-nameserver: ["119.29.29.29", "180.184.1.1", "223.5.5.5"]
+  nameserver: ["223.5.5.5", "119.29.29.29", "180.184.1.1"]
+  fallback:
+    - "https://cloudflare-dns.com/dns-query#默认代理"
+    - "https://1.1.1.1/dns-query#默认代理"
+    - "https://dns.google/dns-query#默认代理"
+  fallback-filter: { geoip: true, geoip-code: CN, ipcidr: ["240.0.0.0/4", "0.0.0.0/32"] }
+  proxy-server-nameserver: ["223.5.5.5", "119.29.29.29", "180.184.1.1"]
+  nameserver-policy:
+    "geosite:google,youtube":
+      - "https://cloudflare-dns.com/dns-query#默认代理"
+      - "https://1.1.1.1/dns-query#默认代理"
+    "geosite:cn,douyin,private": ["223.5.5.5", "119.29.29.29", "180.184.1.1"]
+    "geosite:geolocation-!cn":
+      - "https://cloudflare-dns.com/dns-query#默认代理"
+      - "https://1.1.1.1/dns-query#默认代理"
+
+# ==================== Smart 策略组 ====================
+proxy-groups:
+  - { name: 线路一, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务一\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
+  - { name: 线路二, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务二\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
+  - { name: 线路三, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: "^(?=.*(?i)(\\[服务三\\]))(?!.*(5x|流量|到期|过滤|下载专用)).*$" }
+
+  - { name: 默认代理, type: select, proxies: [香港策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 故障转移, 美国策略, 全球手动, DIRECT] }
+  - { name: 兜底流量, type: select, proxies: [默认代理, DIRECT, 香港策略, 狮城策略, 日本策略, 线路一, 线路二, 线路三, 故障转移, 韩国策略, 美国策略, 台湾策略, 全球手动] }
+  - { name: 故障转移, <<: *BaseFB, proxies: [狮城策略, 日本策略, 台湾策略, 香港策略, 韩国策略, 美国策略, 全球手动, DIRECT] }
+  - { name: 抖快书定位, type: select, proxies: [DIRECT, 香港策略, 台湾策略, 狮城策略, 日本策略, 韩国策略, 美国策略] }
+
+  - { name: 人工智能, <<: *SelectUS }
+  - { name: GitHub, <<: *SelectPY }
+  - { name: 油管视频, <<: *SelectPY }
+  - { name: 奈飞视频, <<: *SelectPY }
+  - { name: TikTok, <<: *SelectTT }
+  - { name: 国际媒体, <<: *SelectPY }
+  - { name: Emby服, <<: *SelectPY }
+  - { name: 电报消息, <<: *SelectPY }
+  - { name: 谷歌服务, <<: *SelectGG }
+  - { name: 微软服务, <<: *SelectPY }
+  - { name: 苹果服务, <<: *SelectPY }
+
+  - { name: 全球手动, type: select, include-all: true, filter: *FilterAL }
+  - { name: 香港策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterHK }
+  - { name: 台湾策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterTW }
+  - { name: 狮城策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterSG }
+  - { name: 日本策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterJP }
+  - { name: 韩国策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterKR }
+  - { name: 美国策略, type: smart, uselightgbm: true, collectdata: true, strategy: sticky-sessions, interval: 120, tolerance: 25, max-failed-times: 2, lazy: true, url: "https://www.gstatic.com/generate_204", include-all: true, filter: *FilterUS }
+
+# ==================== 规则路由 ====================
+rules:
+  - DOMAIN-SUFFIX,tailscale.com,DIRECT
+  - DOMAIN-SUFFIX,tailscale.io,DIRECT
+  - DOMAIN-SUFFIX,ts.net,DIRECT
+  - RULE-SET,Advertising,REJECT
+  - RULE-SET,Tracking,REJECT
+  - RULE-SET,Private,DIRECT
+
+  # TikTok 与国内短视频定位/视频流分层
+  - GEOSITE,tiktok,TikTok
+  - DOMAIN-SUFFIX,tiktok.com,TikTok
+  - DOMAIN-SUFFIX,tiktokcdn.com,TikTok
+  - DOMAIN-SUFFIX,tiktokv.com,TikTok
+  - RULE-SET,LocationDKS,抖快书定位
+  - DOMAIN-SUFFIX,douyincdn.com,DIRECT
+  - DOMAIN-SUFFIX,douyinvod.com,DIRECT
+  - DOMAIN-SUFFIX,douyinstatic.com,DIRECT
+  - DOMAIN-SUFFIX,bilivideo.com,DIRECT
+  - GEOSITE,douyin,DIRECT
+  - GEOSITE,bytedance,DIRECT
+  - RULE-SET,AppleCN,DIRECT
+
+  # AI 专线（剥离重型模型下载站防止流量黑洞）
+  - DOMAIN-SUFFIX,huggingface.co,默认代理
+  - DOMAIN-SUFFIX,hf.co,默认代理
+  - DOMAIN-SUFFIX,ollama.com,默认代理
+  - DOMAIN-SUFFIX,civitai.com,默认代理
+  - RULE-SET,AI,人工智能
+
+  # 拦截 YouTube/Google QUIC 强制走 TCP 跑满 BBR
+  - AND,((NETWORK,UDP),(DST-PORT,443),(GEOSITE,youtube)),REJECT
+  - AND,((NETWORK,UDP),(DST-PORT,443),(GEOSITE,google)),REJECT
+  - GEOSITE,youtube,油管视频
+  - RULE-SET,YouTube,油管视频
+  - GEOSITE,google,谷歌服务
+  - RULE-SET,Google,谷歌服务
+  - GEOSITE,github,GitHub
+  - RULE-SET,GitHub,GitHub
+  - GEOSITE,telegram,电报消息
+  - RULE-SET,Telegram,电报消息
+  - RULE-SET,Twitter,默认代理
+  - RULE-SET,SocialMedia,默认代理
+  - GEOSITE,netflix,奈飞视频
+  - RULE-SET,Netflix,奈飞视频
+  - RULE-SET,Streaming,国际媒体
+  - RULE-SET,Emby,Emby服
+  - RULE-SET,Microsoft,微软服务
+  - RULE-SET,Apple,苹果服务
+  - RULE-SET,Proxy,兜底流量
+  - RULE-SET,Direct,DIRECT
+  - RULE-SET,China,DIRECT
+  - GEOSITE,cn,DIRECT
+
+  # IP 段规则 (统一 no-resolve)
+  - RULE-SET,AdvertisingIP,REJECT,no-resolve
+  - RULE-SET,PrivateIP,DIRECT,no-resolve
+  - RULE-SET,AIIP,人工智能,no-resolve
+  - RULE-SET,TelegramIP,电报消息,no-resolve
+  - RULE-SET,NetflixIP,奈飞视频,no-resolve
+  - RULE-SET,StreamingIP,国际媒体,no-resolve
+  - RULE-SET,GoogleIP,谷歌服务,no-resolve
+  - RULE-SET,ProxyIP,兜底流量,no-resolve
+  - RULE-SET,ChinaIP,DIRECT,no-resolve
+  - MATCH,兜底流量
+
+# ==================== 规则集定义 ====================
+BehaviorDN: &BehaviorDN { type: http, behavior: domain, format: mrs, interval: 86400, proxy: 默认代理 }
+BehaviorIP: &BehaviorIP { type: http, behavior: ipcidr, format: mrs, interval: 86400, proxy: 默认代理 }
+
+rule-providers:
+  Advertising: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Advertising.mrs" }
+  Tracking: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Tracking.mrs" }
+  Direct: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Direct.mrs" }
+  LocationDKS: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/LocationDKS.mrs" }
+  Private: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Private.mrs" }
+  AI: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/AI.mrs" }
+  Telegram: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Telegram.mrs" }
+  Twitter: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Twitter.mrs" }
+  SocialMedia: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/SocialMedia.mrs" }
+  Netflix: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Netflix.mrs" }
+  YouTube: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/YouTube.mrs" }
+  Emby: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Emby.mrs" }
+  Streaming: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Streaming.mrs" }
+  AppleCN: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/AppleCN.mrs" }
+  Apple: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Apple.mrs" }
+  Google: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Google.mrs" }
+  GitHub: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/GitHub.mrs" }
+  Microsoft: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Microsoft.mrs" }
+  Proxy: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/Proxy.mrs" }
+  China: { <<: *BehaviorDN, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/domain/China.mrs" }
+  AdvertisingIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Advertising.mrs" }
+  PrivateIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Private.mrs" }
+  AIIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/AI.mrs" }
+  TelegramIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Telegram.mrs" }
+  NetflixIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Netflix.mrs" }
+  StreamingIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Streaming.mrs" }
+  GoogleIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Google.mrs" }
+  ProxyIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/Proxy.mrs" }
+  ChinaIP: { <<: *BehaviorIP, url: "https://raw.githubusercontent.com/666OS/rules/release/mihomo/ip/China.mrs" }
