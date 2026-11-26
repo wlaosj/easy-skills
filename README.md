@@ -5,8 +5,8 @@
 <br />
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-0066CC?style=flat-square)](LICENSE)
-[![Agent Compatible](https://img.shields.io/badge/Agent-Antigravity%20%7C%20Claude%20Code%20%7C%20Cursor-15803D?style=flat-square)](#-3-步极速接入)
-[![Status](https://img.shields.io/badge/Skills-Production%20Tested-EA580C?style=flat-square)](#-技能目录)
+[![Agent Compatible](https://img.shields.io/badge/Agent-Antigravity%20%7C%20Claude%20Code%20%7C%20Cursor-15803D?style=flat-square)](#3-步极速接入)
+[![Status](https://img.shields.io/badge/Skills-Production%20Tested-EA580C?style=flat-square)](#技能目录)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-334155?style=flat-square)](CONTRIBUTING.md)
 
 <p>
@@ -15,11 +15,11 @@
 </p>
 
 <p>
-  <a href="#-技能目录">技能目录</a> ·
-  <a href="#-架构实景">架构实景</a> ·
-  <a href="#-3-步极速接入">3 步极速接入</a> ·
-  <a href="#-设计理念">设计理念</a> ·
-  <a href="#-路线图">后续路线图</a>
+  <a href="#技能目录">技能目录</a> ·
+  <a href="#架构实景">架构实景</a> ·
+  <a href="#3-步极速接入">3 步极速接入</a> ·
+  <a href="#设计理念">设计理念</a> ·
+  <a href="#仓库结构">仓库结构</a>
 </p>
 
 </div>
@@ -33,11 +33,8 @@
 | 技能名称 | 领域分类 | 核心能力与解决痛点 | 适用环境 | 状态 |
 | :--- | :--- | :--- | :--- | :---: |
 | [`ros-mihomo-smart-architect`](skills/ros-mihomo-smart-architect/SKILL.md) | 软路由 / 网络架构 | 在全新 RouterOS 7.x 上一键部署 **CNIP 内核 FastTrack 直出 + Mihomo Smart (LightGBM) 多机场混跑容器 + 防断网原子切流 + 收口 NAT** | RouterOS 7.12+ (x86 / CHR / ARM64) | **已发布** |
-| `smart-cache-dashboard` | 可视化监控 | 零依赖纯 Python 解析 Mihomo Smart `cache.db`，单页白金 Bento 展示屏（千站千面流向图 / 多机场混跑占比 / 自动避坑记录） | Docker / PVE LXC / NAS | 整理中 |
-| `nas-disk-protection` | NAS / 存储运维 | 机械硬盘防唤醒休眠保护（Spin-down Protection）与低功耗长寿命巡检规范 | Unraid / Linux NAS | 规划中 |
-| `network-preflight-probe` | 全栈工程 / 联调 | 服务接口活体前置网络拨测与前后端契约闭环校验规范 | 通用全栈开发 | 规划中 |
 
-> 如果这个项目帮您省下了折腾时间，欢迎点一颗 **Star** 支持持续更新。
+> 本仓库持续更新，后续实战打磨成熟的新技能将陆续开源。如果项目帮您省下了折腾时间，欢迎点一颗 **Star** 关注更新。
 
 ---
 
@@ -125,15 +122,6 @@ easy-skills/
             ├── mihomo-smart-config.yaml          # Mihomo Smart 脱敏配置模板
             └── ros-init.rsc                      # RouterOS 7.x 初始化脚本模板
 ```
-
----
-
-## 后续路线图
-
-- [x] 发布 `ros-mihomo-smart-architect` 软路由双层智能分流技能
-- [ ] 开源配套 Docker 看板 `smart-cache-dashboard`（一键可视化 Smart 选路与避坑战绩）
-- [ ] 发布 `nas-disk-protection` NAS 机械硬盘防唤醒休眠运维技能
-- [ ] 发布更多 **Easy 系列** 效率与自动化 Agent 技能
 
 ---
 
